@@ -18,20 +18,19 @@
 
 @interface MemSafeTimerMiddleware : NSObject
 @property (nonatomic, weak) id aTarget;
-@property (nonatomic, weak) NSTimer *aTimer;
 @property (nonatomic, assign) SEL aSelector;
 @end
 
 @implementation MemSafeTimerMiddleware
 
 - (void)fire:(NSTimer *)sysTimer {
-    if (_aTarget && [_aTarget respondsToSelector:_aSelector]) {
+    if ([_aTarget respondsToSelector:_aSelector]) {
         IgnorePerformSelectorWarning(
             [_aTarget performSelector:_aSelector withObject:sysTimer];
         );
-    } else if (_aTimer) {
-        [_aTimer invalidate];
-        _aTimer = nil;
+    } else if (sysTimer) {
+        [sysTimer invalidate];
+        sysTimer = nil;
     }
 }
 
@@ -47,10 +46,9 @@
     MemSafeTimerMiddleware *middleware = [MemSafeTimerMiddleware new];
     middleware.aTarget = aTarget;
     middleware.aSelector = aSelector;
-    middleware.aTimer = [NSTimer scheduledTimerWithTimeInterval:ti
+    return [NSTimer scheduledTimerWithTimeInterval:ti
                                                         target:middleware selector:@selector(fire:) userInfo:userInfo
                                                        repeats:yesOrNo];
-    return middleware.aTimer;
 }
 
 @end
