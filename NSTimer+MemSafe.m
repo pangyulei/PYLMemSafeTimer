@@ -16,12 +16,12 @@
         _Pragma("clang diagnostic pop") \
     } while (false)
 
-@interface MemSafeTimerMiddleware : NSObject
+@interface Middleware : NSObject
 @property (nonatomic, weak) id aTarget;
 @property (nonatomic, assign) SEL aSelector;
 @end
 
-@implementation MemSafeTimerMiddleware
+@implementation Middleware
 
 - (void)fire:(NSTimer *)sysTimer {
     if ([_aTarget respondsToSelector:_aSelector]) {
@@ -34,16 +34,12 @@
     }
 }
 
-- (void)dealloc {
-    NSLog(@"MemSafeTimerMiddleware Dealloc");
-}
-
 @end
 
 @implementation NSTimer (MemSafe)
 
-+ (NSTimer *)memSafe_ScheduledTimerWithTimeInterval:(NSTimeInterval)ti target:(id)aTarget selector:(SEL)aSelector userInfo:(id)userInfo repeats:(BOOL)yesOrNo {
-    MemSafeTimerMiddleware *middleware = [MemSafeTimerMiddleware new];
++ (NSTimer *)pyl_scheduledTimerWithTimeInterval:(NSTimeInterval)ti target:(id)aTarget selector:(SEL)aSelector userInfo:(id)userInfo repeats:(BOOL)yesOrNo {
+    Middleware *middleware = [Middleware new];
     middleware.aTarget = aTarget;
     middleware.aSelector = aSelector;
     return [NSTimer scheduledTimerWithTimeInterval:ti
